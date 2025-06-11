@@ -1,7 +1,6 @@
 package exercise.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,7 +33,8 @@ public class ProductsController {
 
     // BEGIN
     @PostMapping("")
-    public ResponseEntity<Product> create(@RequestBody Product data) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Product create(@RequestBody Product data) {
         var isExist = productRepository.findAll().stream()
             .anyMatch(p -> p.equals(data));
 
@@ -43,7 +43,7 @@ public class ProductsController {
         }
 
         var product = productRepository.save(data);
-        return ResponseEntity.status(HttpStatus.CREATED).body(product);
+        return product;
     }
     // END
 
