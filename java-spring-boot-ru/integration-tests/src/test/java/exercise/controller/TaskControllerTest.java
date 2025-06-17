@@ -65,10 +65,8 @@ class TaskControllerTest {
 
     // BEGIN
     @Test
-    public void testUpdate() throws Exception {
+    public void testCreate() throws Exception {
         var task = generateTask();
-
-        taskRepository.save(task);
 
         var request = post("/tasks")
             .contentType(MediaType.APPLICATION_JSON)
@@ -83,12 +81,37 @@ class TaskControllerTest {
         assertThat(task.getDescription()).isEqualTo("Test task description");
     }
 
+    @Test
+    public void testUpdate() throws Exception {
+        var task = generateTask();
+
+        var data = new HashMap<>();
+        data.put("title", "Updated task title");
+        data.put("description", "Updated description");
+
+        var request = put("/tasks/" + task.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(om.writeValueAsString(data));
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk());
+
+        task = taskRepository.findById(task.getId()).get();
+
+        assertThat(task.getTitle()).isEqualTo("Updated task title");
+        assertThat(task.getDescription()).isEqualTo("Updated description");
+    }
+
     private Task generateTask() {
-        return Instancio.of(Task.class)
+        var task = Instancio.of(Task.class)
             .ignore(Select.field(Task::getId))
             .supply(Select.field(Task::getTitle), () -> "Test task title")
             .supply(Select.field(Task::getDescription), () -> "Test task description")
             .create();
+
+        taskRepository.save(task);
+
+        return task;
     }
     // END
 }
