@@ -112,9 +112,21 @@ class TaskControllerTest {
         mockMvc.perform(request)
             .andExpect(status().isOk());
 
-        var tryFindDeletedTask = taskRepository.findById(task.getId());
+        assertThat(taskRepository.findById(task.getId())).isEmpty();
+    }
 
-        assertThat(tryFindDeletedTask).isEmpty();
+    @Test
+    public void testShow() throws Exception {
+        var task = generateAndSaveTask();
+        var request = get("/tasks/" + task.getId());
+
+        var response = mockMvc.perform(request)
+            .andExpect(status().isOk())
+            .andReturn();
+
+        var body = response.getResponse().getContentAsString();
+        assertThatJson(body).isObject().containsEntry("title", task.getTitle());
+        assertThatJson(body).isObject().containsEntry("description", task.getDescription());
     }
 
     private Task generateAndSaveTask() {
