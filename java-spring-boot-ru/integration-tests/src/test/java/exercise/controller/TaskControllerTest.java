@@ -72,13 +72,14 @@ class TaskControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(om.writeValueAsString(task));
 
-        mockMvc.perform(request)
-            .andExpect(status().isCreated());
+        var result = mockMvc.perform(request)
+            .andExpect(status().isCreated())
+            .andReturn();
 
-        task = taskRepository.findById(task.getId()).get();
+        var body = result.getResponse().getContentAsString();
 
-        assertThat(task.getTitle()).isEqualTo("Test task title");
-        assertThat(task.getDescription()).isEqualTo("Test task description");
+        assertThatJson(body).isObject().containsEntry("title", task.getTitle());
+        assertThatJson(body).isObject().containsEntry("description", task.getDescription());
     }
 
     @Test
@@ -119,8 +120,8 @@ class TaskControllerTest {
     private Task generateAndSaveTask() {
         var task = Instancio.of(Task.class)
             .ignore(Select.field(Task::getId))
-            .supply(Select.field(Task::getTitle), () -> "Test task title")
-            .supply(Select.field(Task::getDescription), () -> "Test task description")
+            .supply(Select.field(Task::getTitle), () -> faker.lorem().word())
+            .supply(Select.field(Task::getDescription), () -> faker.lorem().paragraph(2))
             .create();
 
         taskRepository.save(task);
