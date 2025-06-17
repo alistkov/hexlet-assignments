@@ -66,7 +66,7 @@ class TaskControllerTest {
     // BEGIN
     @Test
     public void testCreate() throws Exception {
-        var task = generateTask();
+        var task = generateAndSaveTask();
 
         var request = post("/tasks")
             .contentType(MediaType.APPLICATION_JSON)
@@ -83,7 +83,7 @@ class TaskControllerTest {
 
     @Test
     public void testUpdate() throws Exception {
-        var task = generateTask();
+        var task = generateAndSaveTask();
 
         var data = new HashMap<>();
         data.put("title", "Updated task title");
@@ -102,7 +102,21 @@ class TaskControllerTest {
         assertThat(task.getDescription()).isEqualTo("Updated description");
     }
 
-    private Task generateTask() {
+    @Test
+    public void testDelete() throws Exception {
+        var task = generateAndSaveTask();
+
+        var request = delete("/tasks/" + task.getId());
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk());
+
+        var tryFindDeletedTask = taskRepository.findById(task.getId());
+
+        assertThat(tryFindDeletedTask).isEmpty();
+    }
+
+    private Task generateAndSaveTask() {
         var task = Instancio.of(Task.class)
             .ignore(Select.field(Task::getId))
             .supply(Select.field(Task::getTitle), () -> "Test task title")
