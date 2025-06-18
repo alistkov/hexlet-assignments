@@ -28,7 +28,7 @@ public class Guest {
     private long id;
 
     // BEGIN
-    @NotNull
+    @NotBlank
     private String name;
 
     @Column(unique = true)
@@ -37,10 +37,9 @@ public class Guest {
 
     @NotNull
     @Pattern(regexp = "^\\+\\d{11,13}$")
-    @Size(min = 11, max = 13)
     private String phoneNumber;
 
-    @Size(min = 4, max = 4)
+    @Pattern(regexp = "\\d{4}")
     private String clubCard;
 
     @Future
