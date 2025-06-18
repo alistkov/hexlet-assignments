@@ -25,8 +25,11 @@ public class PostsController {
     private CommentRepository commentRepository;
 
     @GetMapping("")
-    public List<Post> index() {
-        return postRepository.findAll();
+    public List<PostDTO> index() {
+        var posts = postRepository.findAll();
+        return posts.stream()
+            .map(this::toPostDto)
+            .toList();
     }
 
     @GetMapping("/{id}")
@@ -34,8 +37,17 @@ public class PostsController {
         var post = postRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
 
-        var comments = commentRepository.findByPostId(id)
-            .stream()
+        return toPostDto(post);
+    }
+
+    private PostDTO toPostDto(Post post) {
+        var dto = new PostDTO();
+        dto.setId(post.getId());
+        dto.setTitle(post.getTitle());
+        dto.setBody(post.getBody());
+
+        var comments = commentRepository.findByPostId(post.getId());
+        var commentsDto = comments.stream()
             .map(comment -> {
                 var result = new CommentDTO();
                 result.setBody(comment.getBody());
@@ -44,15 +56,8 @@ public class PostsController {
             })
             .toList();
 
-
-
-        var response = new PostDTO();
-        response.setBody(post.getBody());
-        response.setTitle(post.getTitle());
-        response.setId(post.getId());
-        response.setComments(comments);
-
-        return response;
+        dto.setComments(commentsDto);
+        return dto;
     }
 }
 // END
