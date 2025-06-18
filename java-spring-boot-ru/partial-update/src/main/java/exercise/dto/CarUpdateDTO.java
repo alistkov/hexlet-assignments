@@ -10,8 +10,13 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CarUpdateDTO {
+    @NotNull
     private JsonNullable<String> model;
+
+    @NotNull
     private JsonNullable<String> manufacturer;
+
+    @NotNull
     private JsonNullable<Integer> enginePower;
 }
 // END
