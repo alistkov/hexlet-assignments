@@ -59,6 +59,11 @@ public class TasksController {
     @ResponseStatus(HttpStatus.CREATED)
     public TaskDTO create(@Valid @RequestBody TaskCreateDTO taskCreateDTO) {
         var task = taskMapper.map(taskCreateDTO);
+
+        var assignee = userRepository.findById(taskCreateDTO.getAssigneeId())
+            .orElseThrow(() -> new ResourceNotFoundException("User with not found"));
+
+        task.setAssignee(assignee);
         taskRepository.save(task);
         return taskMapper.map(task);
     }
@@ -72,8 +77,8 @@ public class TasksController {
         var assignee = userRepository.findById(taskUpdateDTO.getAssigneeId())
             .orElseThrow(() -> new ResourceNotFoundException("Assignee not found"));
 
-        task.setAssignee(assignee);
         taskMapper.update(taskUpdateDTO, task);
+        task.setAssignee(assignee);
         taskRepository.save(task);
         return taskMapper.map(task);
     }
