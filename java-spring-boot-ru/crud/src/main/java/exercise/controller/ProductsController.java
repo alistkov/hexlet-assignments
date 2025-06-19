@@ -9,7 +9,15 @@ import exercise.mapper.ProductMapper;
 import exercise.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import exercise.exception.ResourceNotFoundException;
 import exercise.repository.ProductRepository;
@@ -34,13 +42,7 @@ public class ProductsController {
         var products = productRepository.findAll();
 
         return products.stream()
-            .map(p -> {
-                var category = categoryRepository.findById(p.getCategory().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-                var dto = productMapper.map(p);
-                dto.setCategoryName(category.getName());
-                return dto;
-            })
+            .map(productMapper::map)
             .toList();
     }
 
@@ -57,14 +59,7 @@ public class ProductsController {
     public ProductDTO show(@PathVariable Long id) {
         var product = productRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
-
-        var category = categoryRepository.findById(product.getCategory().getId())
-            .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-
-        var dto = productMapper.map(product);
-        dto.setCategoryName(category.getName());
-
-        return dto;
+        return productMapper.map(product);
     }
 
     @PutMapping("/{id}")
