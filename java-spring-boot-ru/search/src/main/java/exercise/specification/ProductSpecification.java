@@ -20,7 +20,7 @@ public class ProductSpecification {
 
     private Specification<Product> withTitleCont(String title) {
         return (root, query, cb) ->
-            title == null ? cb.conjunction() : cb.like(root.get("title"), "%" + title + "%");
+            title == null ? cb.conjunction() : cb.like(cb.lower(root.get("title")), "%" + title + "%");
     }
 
     private Specification<Product>  withCategoryId(Long categoryId) {
